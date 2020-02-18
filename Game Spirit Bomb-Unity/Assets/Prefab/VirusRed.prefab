@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4874961063260437533}
   - component: {fileID: 1858555785}
   - component: {fileID: 8996925752764186225}
+  - component: {fileID: 114339466922683096}
   - component: {fileID: 2461234211022453675}
   m_Layer: 8
   m_Name: VirusRed
@@ -118,6 +119,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88bdcff429ca3d34c9c3b79f1a0aad8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114339466922683096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4874961063260437532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59556defdee2b41489d5c68716462674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &2461234211022453675

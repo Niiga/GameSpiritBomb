@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
 
     //重新加载关卡
     public void RefreshLevel() {
+        GreenCount = 0;
         SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex);
     }
 
@@ -124,16 +125,34 @@ public class GameManager : MonoBehaviour
         virusCount ++;
     }
 
-    //放置绿色格子
-    public void PlaceGreenCell(Vector2Int pos) {
+    //点击空白格子，放置一个绿色格子
+    public void InteractWithWhiteCell(Vector2Int pos) {
         if (FirstStep)
             FirstStep = false;
         Steps++;
         GreenCount++;
         getGreenCell (pos).EnableCell ();
-        Debug.Log ($"0 放置绿色格子");
+        Debug.Log ($"0 点击白色格子");
         UpdateWholeGrid ();
         CheckEndState();
+    }
+    //点击灰色格子，并消灭它
+    public void InteractWithGreyCell(Cell cell){
+        if (FirstStep)
+            FirstStep = false;
+        Steps++;
+        RemoveGreyCell(cell);
+        Debug.Log ($"0 点击灰色格子");
+        UpdateWholeGrid ();
+        CheckEndState();
+    }
+    //与红色格子交互，并限制它的移动
+    public void InteractWithRedCell(Vector2Int pos){
+        Steps++;
+        Debug.Log ($"0 点击红色格子");
+        UpdateGreen ();
+        UpdateVirusGrey ();
+        CheckEndState();        
     }
 
     //检查胜败条件
@@ -228,6 +247,7 @@ public class GameManager : MonoBehaviour
             else if (IfPosGreen (cell.nextIndex)) {
                 if(ResolveGreenCell(getGreenCell(cell.nextIndex), cell)){
                     RemoveGreenCell(cell.nextIndex);
+                    PlaceGreyCell(cell.index);
                     cell.Step ();
                     return;
                 }
