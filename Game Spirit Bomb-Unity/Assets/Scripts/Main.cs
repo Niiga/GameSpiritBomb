@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
+    public AudioManager audioManager;
+    public HUD hud;
     // Start is called before the first frame update
     void Start()
     {
@@ -11,7 +13,10 @@ public class Main : MonoBehaviour
     }
     void InitTheLevel(){
         GameManager.instance.GetMainCamera();
-        GameManager.instance.GenerateGrid();
+        GameManager.instance.GetAudioManager(audioManager);
+        GameManager.instance.GetHUD(hud);
+
+        // GameManager.instance.GenerateGrid();
     }
 
     // Update is called once per frame

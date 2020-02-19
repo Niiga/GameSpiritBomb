@@ -3,7 +3,17 @@ guid: 53a48b9285469924c89c8a2991a756eb
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - GridPrefab: {fileID: 6242516759886230915, guid: 36ca6aaf580229b44a7c0a7188c06dae,
+      type: 3}
+  - VirusRedPrefab: {fileID: 4874961063260437532, guid: e845cc467666cd549a78b1cd7f2d8f68,
+      type: 3}
+  - VirusGreyPrefab: {fileID: 7639969541301661998, guid: 110f3fff7f7011240acac6818517bad6,
+      type: 3}
+  - PlayerGreenPrefab: {fileID: 4778936804903125125, guid: 776f2068274631443a73c15c15eca91c,
+      type: 3}
+  - Highlighter: {fileID: 5592343037105379202, guid: 682408ee234536542b5da3b88d8896c8,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,22 +8,28 @@ public class GameManager : MonoBehaviour
     public GameObject VirusRedPrefab;   //敌方主将 红
     public GameObject VirusGreyPrefab;  //敌方人员 灰
     public GameObject PlayerGreenPrefab;//我方主将 绿
+    [Header ("Grid")]
+    public float margin;
     [Header ("Level")]
     public int Level = 1;//关卡数
-    public int TotalGrids { get { return (Level + 2) * (Level + 2); } }//总网格数
-    public int RowCount { get { return Level + 2; } }//每一排网格数
+    public int TotalGrids { get { return (Level*2) * (Level*3); } }//总网格数
+    public int RowCount { get { return Level*2; } }//每一排网格数
+    public int ColumnCount{ get { return Level*3; }}//每一纵队网格数
     public int GreenCount { get; protected set; }//总体绿色格子的数目
+    public int HealthCount { get{return GreenCount;}}
     public int virusCount { get; protected set; }//病毒个数
     public int Steps { get; protected set; }//步骤数
     public float perUnitScale { get; protected set; }//每一格的单位大小
-    public int HealthCount { get; protected set; }
     public Camera cam { get; protected set; }//获取主摄像机
     public Cell VirusRed { get; protected set; }
     public SpawnGreyVirus VirusSpawner { get; protected set; }
     public Cell[] GreenCells { get; protected set; }
     public List<Cell> GreyCells { get; protected set; }
     public GameObject GridRoot { get; protected set; }
+    public AudioManager audioManager {get; protected set; }
+    public HUD hud{get; protected set; }
     public static GameManager instance;
+    protected Cell ClickedGreyCell;
     protected bool FirstStep = true;
 
     //设置GameManager为Singleton，且不会因为加载关卡被重置
@@ -44,10 +48,28 @@ public class GameManager : MonoBehaviour
         cam = Camera.main;
     }
 
+    //获取AudioManager
+    public void GetAudioManager(AudioManager _audioManager){
+        audioManager = _audioManager;
+    }
+
+    //获取HUD
+    public void GetHUD(HUD _hud){
+        hud = _hud;
+    }
+
+    //卸载所有关卡资源
+    public void UnloadLevel() {
+        GreenCount = 0;
+        FirstStep  = true;
+        GreyCells.Clear();
+        Destroy(GridRoot.gameObject);
+    }
+
     //重新加载关卡
     public void RefreshLevel() {
-        GreenCount = 0;
-        SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex);
+        UnloadLevel();
+        GenerateGrid();
     }
 
     //加载下一关
@@ -72,10 +94,10 @@ public class GameManager : MonoBehaviour
 
         //根据摄像机的scale，以及网格总数，获取单元网格的大小
         Camera cam = Camera.main;
-        perUnitScale = (cam.orthographicSize * 2 * cam.aspect) / RowCount;
+        perUnitScale = (cam.orthographicSize * 2 * cam.aspect-margin) / RowCount;
 
         //设置网格根节点的起始点
-        Vector2 InitOffset = new Vector2 (-perUnitScale * (RowCount - 1) / 2f, -perUnitScale * (RowCount - 1) / 2f);
+        Vector2 InitOffset = new Vector2 (-perUnitScale * (RowCount - 1) / 2f, -perUnitScale * (ColumnCount - 1) / 2f);
         GridRoot.transform.position = InitOffset;
 
         //生成网格与所有绿色格子，并关掉所有的绿色格子
@@ -131,27 +153,31 @@ public class GameManager : MonoBehaviour
             FirstStep = false;
         Steps++;
         GreenCount++;
+        audioManager.PlaySound(2);
         getGreenCell (pos).EnableCell ();
-        Debug.Log ($"0 点击白色格子");
+        // Debug.Log ($"0 点击白色格子");
         UpdateWholeGrid ();
         CheckEndState();
     }
-    //点击灰色格子，并消灭它
+    //点击灰色格子，并削弱它
     public void InteractWithGreyCell(Cell cell){
         if (FirstStep)
             FirstStep = false;
         Steps++;
-        RemoveGreyCell(cell);
-        Debug.Log ($"0 点击灰色格子");
+        ReduceInfectionLevel(cell);
+        ClickedGreyCell = cell;
+        // Debug.Log ($"1 点击灰色格子");
         UpdateWholeGrid ();
+        ClickedGreyCell = null;
         CheckEndState();
     }
     //与红色格子交互，并限制它的移动
     public void InteractWithRedCell(Vector2Int pos){
         Steps++;
-        Debug.Log ($"0 点击红色格子");
+        // Debug.Log ($"2 点击红色格子");
         UpdateGreen ();
         UpdateVirusGrey ();
+        UpdateGreen ();
         CheckEndState();        
     }
 
@@ -160,21 +186,25 @@ public class GameManager : MonoBehaviour
         if(CheckFillState()){
             if(GreenCount > virusCount){
                 Debug.Log("Win");
-                NextLevel();
+                hud.DisplayWinScenes();
+                // NextLevel();
             }
             else{
                 Debug.Log("Lose");
-                RefreshLevel();
+                hud.DisplayLoseScenes();
+                // RefreshLevel();
             }
         }
         else{
             if(CheckLoseState()){
                 Debug.Log("Lose");
-                RefreshLevel();
+                hud.DisplayLoseScenes();
+                // RefreshLevel();
             }
             else if(CheckWinState()){
                 Debug.Log("Win");
-                NextLevel();
+                hud.DisplayWinScenes();
+                // NextLevel();
             }
         }
     }
@@ -193,8 +223,9 @@ public class GameManager : MonoBehaviour
     }
 
     //消灭灰色格子
-    protected void RemoveGreyCell(Cell cell){
+    public void RemoveGreyCell(Cell cell){
         virusCount --;
+        audioManager.PlaySound(3);
         GreyCells.Remove(cell);
         Destroy(cell.gameObject);
     }
@@ -202,7 +233,13 @@ public class GameManager : MonoBehaviour
     //消灭绿色格子
     protected void RemoveGreenCell(Vector2Int pos) {
         GreenCount--;
+        audioManager.PlaySound(4);
         getGreenCell (pos).DisableCell ();
+    }
+
+    //削弱灰色格子的感染值
+    protected void ReduceInfectionLevel(Cell cell){
+        cell.GetComponent<InfectionLevel>().ReduceLevel();
     }
 
     //更新整个网格
@@ -210,7 +247,8 @@ public class GameManager : MonoBehaviour
         UpdateGreen ();
         UpdateVirusGrey ();
         UpdateVirusRed ();
-        Debug.Log ($"1 更新整个网格");
+        UpdateGreen ();
+        // Debug.Log ($"3 更新整个网格");
     }
 
     //更新所有绿色格子
@@ -238,6 +276,8 @@ public class GameManager : MonoBehaviour
     //更新灰色格子
     protected void UpdateVirusGrey() {
         foreach (Cell cell in GreyCells) {
+            //跳过被点击的灰色格子
+            if(cell == ClickedGreyCell) continue;
             //更新灰色格子的位置
             cell.PrepareStep ();
 
@@ -267,7 +307,7 @@ public class GameManager : MonoBehaviour
 
     //检查给定位置是否有网格
     public bool CheckGrid(Vector2Int pos) {
-        if (pos.x < 0 || pos.x >= RowCount || pos.y < 0 || pos.y >= RowCount)
+        if (pos.x < 0 || pos.x >= RowCount || pos.y < 0 || pos.y >= ColumnCount)
             return false;
         return true;
     }
@@ -344,6 +384,8 @@ public class GameManager : MonoBehaviour
 
         return true;
     }
+
+    //检查失败条件
     protected bool CheckLoseState() {
         return GreenCount == 0 && !FirstStep;
     }
