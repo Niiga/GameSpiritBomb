@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject PlayerGreenPrefab;//我方主将 绿
     [Header ("Grid")]
     public float margin;
+    public float cellMoveTime = .2f;
     [Header ("Level")]
     public int Level = 1;//关卡数
     public int TotalGrids { get { return (Level*2) * (Level*3); } }//总网格数
@@ -27,6 +29,7 @@ public class GameManager : MonoBehaviour
     public List<Cell> GreyCells { get; protected set; }
     public GameObject GridRoot { get; protected set; }
     public AudioManager audioManager {get; protected set; }
+    public bool WaitForInput{get; protected set;}//等待输入，真为等待输入，否为不接受输入
     public HUD hud{get; protected set; }
     public static GameManager instance;
     protected Cell ClickedGreyCell;
@@ -68,6 +71,7 @@ public class GameManager : MonoBehaviour
 
     //重新加载关卡
     public void RefreshLevel() {
+        WaitForInput = true;
         UnloadLevel();
         GenerateGrid();
     }
@@ -110,6 +114,7 @@ public class GameManager : MonoBehaviour
             GameObject grid = Instantiate (GridPrefab);
             grid.transform.parent = GridRoot.transform;
             grid.transform.localPosition = pos;
+            grid.transform.localPosition += Vector3.forward;
             grid.transform.localScale *= perUnitScale;
             grid.GetComponent<Cell> ().SetIndex (i % RowCount, i / RowCount);
 
@@ -134,6 +139,7 @@ public class GameManager : MonoBehaviour
         GreyCells = new List<Cell> ();
         virusCount = 1;
         Steps = 0;
+        WaitForInput = true;
     }
 
     //放置灰色格子
@@ -147,66 +153,110 @@ public class GameManager : MonoBehaviour
         virusCount ++;
     }
 
-    //点击空白格子，放置一个绿色格子
-    public void InteractWithWhiteCell(Vector2Int pos) {
+//用coroutine处理格子的交互
+//Coroutine开始
+    IEnumerator Coroutine_WhiteCellInteraction(Vector2Int pos){
+        WaitForInput = false;
         if (FirstStep)
             FirstStep = false;
         Steps++;
         GreenCount++;
         audioManager.PlaySound(2);
         getGreenCell (pos).EnableCell ();
-        // Debug.Log ($"0 点击白色格子");
         UpdateWholeGrid ();
-        CheckEndState();
+        //停顿让移动完全进行
+        yield return new WaitForSeconds(cellMoveTime+.1f);
+
+        //如果游戏未结束，重新开启输入检测
+        if(!CheckEndState()) WaitForInput = true;
+
+        yield return null;
     }
-    //点击灰色格子，并削弱它
-    public void InteractWithGreyCell(Cell cell){
+    IEnumerator Coroutine_GreyCellInteraction(Cell cell){
+        WaitForInput = false;
         if (FirstStep)
             FirstStep = false;
         Steps++;
         ReduceInfectionLevel(cell);
         ClickedGreyCell = cell;
-        // Debug.Log ($"1 点击灰色格子");
         UpdateWholeGrid ();
         ClickedGreyCell = null;
-        CheckEndState();
+        //停顿让移动完全进行
+        yield return new WaitForSeconds(cellMoveTime);
+
+        //如果游戏未结束，重新开启输入检测
+        if(!CheckEndState()) WaitForInput = true;
+
+        yield return null;
     }
-    //与红色格子交互，并限制它的移动
-    public void InteractWithRedCell(Vector2Int pos){
+    IEnumerator Coroutine_RedCellInteraction(Vector2Int pos){
+        WaitForInput = false;
         Steps++;
-        // Debug.Log ($"2 点击红色格子");
         UpdateGreen ();
         UpdateVirusGrey ();
         UpdateGreen ();
-        CheckEndState();        
+        //停顿让移动完全进行
+        yield return new WaitForSeconds(cellMoveTime);
+
+        //如果游戏未结束，重新开启输入检测
+        if(!CheckEndState()) WaitForInput = true;
+
+        yield return null;
+    }
+    IEnumerator Coroutine_MovePieces(Vector2Int pos, Cell cell, float time = 1){
+        Vector3 initPos = cell.transform.localPosition;
+        Vector3 targetPos = perUnitScale*(Vector2)pos;
+        for(float timer = 0; timer < 1; timer += Time.deltaTime/time){
+            cell.transform.localPosition = Vector3.Lerp(initPos, targetPos, timer);
+            yield return null;
+        }
+        cell.transform.localPosition = perUnitScale*(Vector2)pos;
+        yield return null;
+    }
+//Coroutine结束
+
+    //点击空白格子，放置一个绿色格子
+    public void InteractWithWhiteCell(Vector2Int pos) {
+        StartCoroutine(Coroutine_WhiteCellInteraction(pos));
+    }
+    //点击灰色格子，并削弱它
+    public void InteractWithGreyCell(Cell cell){
+        StartCoroutine(Coroutine_GreyCellInteraction(cell));
+    }
+    //与红色格子交互，并限制它的移动
+    public void InteractWithRedCell(Vector2Int pos){
+        StartCoroutine(Coroutine_RedCellInteraction(pos));
+    }
+    //移动格子
+    public void MovePieces(Vector2Int pos, Cell cell, float time = 1){
+        StartCoroutine(Coroutine_MovePieces(pos, cell, time));
     }
 
     //检查胜败条件
-    protected void CheckEndState(){
+    protected bool CheckEndState(){
         if(CheckFillState()){
             if(GreenCount > virusCount){
-                Debug.Log("Win");
                 hud.DisplayWinScenes();
-                // NextLevel();
             }
             else{
-                Debug.Log("Lose");
                 hud.DisplayLoseScenes();
-                // RefreshLevel();
             }
+            return true;
         }
         else{
             if(CheckLoseState()){
-                Debug.Log("Lose");
+                WaitForInput = false;
                 hud.DisplayLoseScenes();
-                // RefreshLevel();
+                return true;
             }
             else if(CheckWinState()){
-                Debug.Log("Win");
+                WaitForInput = false;
                 hud.DisplayWinScenes();
-                // NextLevel();
+                return true;
             }
         }
+
+        return false;
     }
 
     //遭遇绿色格子
@@ -275,33 +325,33 @@ public class GameManager : MonoBehaviour
 
     //更新灰色格子
     protected void UpdateVirusGrey() {
-        foreach (Cell cell in GreyCells) {
+        for (int i=GreyCells.Count-1; i>=0; i--) {
             //跳过被点击的灰色格子
-            if(cell == ClickedGreyCell) continue;
+            if(GreyCells[i] == ClickedGreyCell) continue;
             //更新灰色格子的位置
-            cell.PrepareStep ();
+            GreyCells[i].PrepareStep ();
 
-            if (IfPosGrey (cell.nextIndex) || IfPosRed (cell.nextIndex)) {
-                cell.Reset ();
+            if (IfPosGrey (GreyCells[i].nextIndex) || IfPosRed (GreyCells[i].nextIndex)) {
+                GreyCells[i].Reset ();
             }
-            else if (IfPosGreen (cell.nextIndex)) {
-                if(ResolveGreenCell(getGreenCell(cell.nextIndex), cell)){
-                    RemoveGreenCell(cell.nextIndex);
-                    PlaceGreyCell(cell.index);
-                    cell.Step ();
-                    return;
+            else if (IfPosGreen (GreyCells[i].nextIndex)) {
+                if(ResolveGreenCell(getGreenCell(GreyCells[i].nextIndex), GreyCells[i])){
+                    RemoveGreenCell(GreyCells[i].nextIndex);
+                    PlaceGreyCell(GreyCells[i].index);
+                    GreyCells[i].Step ();
+                    continue;
                 }
                 else{
-                    RemoveGreyCell(cell);
-                    return;
+                    RemoveGreyCell(GreyCells[i]);
+                    continue;
                 }
             }
             else {
-                cell.Step ();
+                GreyCells[i].Step ();
             }
 
             //移动之后，灰色格子感染值+1
-            cell.GetComponent<InfectionLevel>().UpgradeLevel();
+            GreyCells[i].GetComponent<InfectionLevel>().UpgradeLevel();
         }
     }
 

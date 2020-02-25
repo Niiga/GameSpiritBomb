@@ -11,6 +11,7 @@ public class Click_Red : MonoBehaviour
     }
 
     void OnMouseDown(){
+        if(!GameManager.instance.WaitForInput) return;
         GameManager.instance.InteractWithRedCell(cell.index);
     }
 }

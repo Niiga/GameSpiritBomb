@@ -72,6 +72,78 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+--- !u!1 &2956451668481578656
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5127140255855842903}
+  - component: {fileID: 5591376058258210915}
+  - component: {fileID: 8311264671465925948}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5127140255855842903
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2956451668481578656}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3970411745681295284}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5591376058258210915
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2956451668481578656}
+  m_CullTransparentMesh: 0
+--- !u!114 &8311264671465925948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2956451668481578656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
 --- !u!1 &3287571307384415729
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +174,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
@@ -260,15 +332,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startButton: {fileID: 3970411746198290693}
   runingBackButton: {fileID: 5490646547877710172}
-  gameoverBackButton: {fileID: 0}
-  gameoverNextLevelButton: {fileID: 5490646546728805612}
-  gameoverText: {fileID: 0}
+  gameoverWinButton: {fileID: 0}
+  gameoverLoseButton: {fileID: 0}
+  ExitButton: {fileID: 0}
+  ExitOKButton: {fileID: 0}
+  ExitCancelButton: {fileID: 0}
+  staffButton: {fileID: 0}
+  staffOBJ: {fileID: 0}
+  gameoverImage: {fileID: 0}
+  goDownScript: {fileID: 0}
+  OFFhowToPlayButton: {fileID: 0}
+  ONhowToPlayButton: {fileID: 0}
+  howToPlayOBJ: {fileID: 0}
   Running: {fileID: 0}
   audioOBJ: {fileID: 0}
   levelText: {fileID: 3970411746024236501}
   stepText: {fileID: 3970411744817816636}
   virusCountText: {fileID: 3970411744581293803}
   healthCountText: {fileID: 3970411744554187497}
+  WinImg: {fileID: 0}
+  LoseImg: {fileID: 0}
 --- !u!1 &3970411744371378703
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,7 +874,7 @@ RectTransform:
   - {fileID: 3970411746098625807}
   - {fileID: 3970411744371378700}
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1210,13 +1293,14 @@ RectTransform:
   - {fileID: 1270993724954514898}
   - {fileID: 81622879524140696}
   - {fileID: 9174548017096636339}
-  - {fileID: 4713183654238768747}
   - {fileID: 3970411745739465018}
   - {fileID: 7434554872021637317}
   - {fileID: 8471698374776120853}
   - {fileID: 5170470303759976315}
   - {fileID: 3970411744901793379}
   - {fileID: 3970411746198290694}
+  - {fileID: 4713183654238768747}
+  - {fileID: 5127140255855842903}
   m_Father: {fileID: 3970411744368243448}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1392,7 +1476,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.040000003}
   m_AnchorMax: {x: 0.7938889, y: 0.9771875}
@@ -1665,7 +1749,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1941,7 +2025,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1974,7 +2058,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 471f26809fd2c4c7ca9b9cf9d5c8081e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4897b8359d92e4ec4a4e166d8f105424, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2386,7 +2470,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
@@ -2530,7 +2614,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3970411745681295284}
-  m_RootOrder: 3
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

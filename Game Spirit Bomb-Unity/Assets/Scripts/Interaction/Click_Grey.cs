@@ -11,6 +11,7 @@ public class Click_Grey : MonoBehaviour
     }
 
     void OnMouseDown(){
+        if(!GameManager.instance.WaitForInput) return;
         GameManager.instance.InteractWithGreyCell(cell);
     }
 }

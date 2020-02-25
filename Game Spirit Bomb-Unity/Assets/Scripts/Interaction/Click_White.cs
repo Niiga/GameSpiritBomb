@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Cell))]
 public class Click_White : MonoBehaviour
@@ -13,6 +11,7 @@ public class Click_White : MonoBehaviour
     }
 
     void OnMouseDown(){
+        if(!GameManager.instance.WaitForInput) return;
         GameManager.instance.InteractWithWhiteCell(cell.index);
     }
 }

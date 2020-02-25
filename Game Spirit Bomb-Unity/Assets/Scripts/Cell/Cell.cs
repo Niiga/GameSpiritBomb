@@ -39,7 +39,7 @@ public class Cell : MonoBehaviour
     //向指定方向前进，并更新坐标
     public void Step(){
         index = nextIndex;
-        transform.localPosition = GameManager.instance.perUnitScale*(Vector2)index;       
+        GameManager.instance.MovePieces(index, this, GameManager.instance.cellMoveTime);
     }
 
     //开启与关闭当前的格子
